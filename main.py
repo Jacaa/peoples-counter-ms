@@ -2,6 +2,7 @@ import config
 import datetime
 import smtplib
 from database import *
+from email.mime.text import MIMEText
 
 # SMTP settings
 sender = config.GMAIL_USERNAME
@@ -52,18 +53,21 @@ if any(receivers):
     # Prepare email's message
     direction = 'in' if walked_in else 'out'
 
-    msg = """From: %s
-    Subject: Someone just walked %s!
-
-    Date of the event: %s.
-    """ % (sender, direction, date.strftime('%d %b %Y %H:%M:%S'))
-
+    SUBJECT = "Someone just walked %s!" % direction
+    msg = "Date of the event: %s. " % date.strftime('%d %b %Y %H:%M:%S')
     if save_photo: msg += "Photo was taken."
+    TO = ','.join(receivers)
+    FROM = sender
+
+    msg = MIMEText(msg)
+    msg['Subject'] = SUBJECT
+    msg['To'] = TO
+    msg['From'] = FROM
 
     # Send email to receivers
     server = smtplib.SMTP('smtp.gmail.com:587')
     server.ehlo()
     server.starttls()
     server.login(username,password)
-    server.sendmail(sender, receivers, msg)
+    server.sendmail(FROM, TO, msg.as_string())
     server.quit()

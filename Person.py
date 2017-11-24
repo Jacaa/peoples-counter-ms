@@ -22,12 +22,12 @@ class Person:
                 if last_coords_x > line_in_x and pre_last_coords_x <= line_in_x:
                     self.direction = 'in'
                     print "Person %s just walked %s" % (self.id, self.direction)
-                    return self.direction
+                    return True
                 elif last_coords_x < line_out_x and pre_last_coords_x >= line_out_x:
                     self.direction = 'out'
                     print "Person %s just walked %s" % (self.id, self.direction)
-                    return self.direction
+                    return True
             else:
-                return self.direction
+                return False
         else:
-            return self.direction
+            return False

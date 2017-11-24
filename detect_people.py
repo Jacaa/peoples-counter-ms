@@ -1,18 +1,20 @@
-# Program based on http://www.femb.com.mx/people-counter/ tutorial
-# by Federico Mejia
+# The part of this script of detecting 
+# and tracking people is inspired by: http://www.femb.com.mx/people-counter/
 # -----------------------------------------------------------------------------
-import cv2
 import numpy as np
+import cv2
+import Person
 
 # Open video file
-cap = cv2.VideoCapture('video.h264')
+cap = cv2.VideoCapture('video.avi')
 
 # Camera view is in resolution 360p - 480x360
 w = 480
 h = 360
 
-# Define points coordinates of the lines and texts
+# Define points coordinates
 dw = int(w/12) # Width divided by 12
+_20 = dw/2
 _40 = dw
 _80 = 2*dw
 _120 = 3*dw
@@ -24,16 +26,18 @@ _320 = 8*dw
 _360 = 9*dw
 _400 = 10*dw
 _440 = 11*dw
+_460 = int(11.5*dw)
 _480 = 12*dw
 
+# Lines and texts coordinates
 # Line 'left border'
-pt1 = [_40, 0]
-pt2 = [_40, _480]
+pt1 = [_20, 0]
+pt2 = [_20, _480]
 left_border = np.array([pt1, pt2]).reshape((-1, 1, 2))
 
 # Line 'right border'
-pt1 = [_440, 0]
-pt2 = [_440, _480]
+pt1 = [_460, 0]
+pt2 = [_460, _480]
 right_border = np.array([pt1, pt2]).reshape((-1, 1, 2))
 
 # Line 'in'
@@ -87,12 +91,16 @@ kernel_opening = np.ones((3,3),np.uint8)
 kernel_closing = np.ones((11,11),np.uint8)
 
 # Set minimum area
-areaMinimum = 10000
+areaMinimum = 7500
+# areaMinimum = 500
 
 # Variables
-persons = []
-pid = 1
-max_p_age = 5
+people = []
+person_id = 1
+line_in_x = _280
+line_out_x = _200
+left_border_x = _20
+right_border_x = _460
 
 while(cap.isOpened()):
     # Read a frame
@@ -113,25 +121,50 @@ while(cap.isOpened()):
         print "Camera is off"
         break
 
-    
     # Detect contours
     _, contours0, hierarchy = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
     for cnt in contours0:
-        
         area = cv2.contourArea(cnt)
+        # print area
         if area > areaMinimum:
             # Calculate center point of the area
             M = cv2.moments(cnt)
             cx = int(M['m10']/M['m00'])
             cy = int(M['m01']/M['m00'])
-
+            # print cx
             # Draw countours and center point
             cv2.circle(frame,(cx,cy), 5, (255,255,255), -1)
-            cv2.drawContours(frame, cnt, -1, (255,0,0), 3, 8)
-           
-            # Todo
-            # PEOPLE TRACKING
-            
+            # cv2.drawContours(frame, cnt, -1, (255,0,0), 3, 8)
+            x,y,w,h = cv2.boundingRect(cnt)
+            # img = cv2.rectangle(frame,(x,y),(x+w,y+h),blue,2)
+
+            # Track person and specify direction of movements
+            new_person = True
+
+            for person in people:
+                if abs(cx-person.x) <= w and abs(cy-person.y) <= h:
+                    new_person = False
+                    person.update_coords(cx, cy)
+                    person.specify_direction(line_in_x, line_out_x)
+                    
+                    if person.direction == 'in' and person.x >= right_border_x:
+                        print "Delete person %f" % person.id
+                        index = people.index(person)
+                        people.pop(index)
+                        del person
+                    elif person.direction == 'out' and person.x <= left_border_x:
+                        print "Delete person %f" % person.id
+                        index = people.index(person)
+                        people.pop(index)
+                        del person
+                    break
+
+            if new_person:
+                person = Person.Person(person_id, cx, cy)
+                print 'Created new person, ID: %f' % person.id
+                people.append(person)
+                person_id += 1
+
     # Draw GUI
 
     # Line 'In'

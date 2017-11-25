@@ -8,6 +8,7 @@ The part of detecting
 and tracking people is inspired by tutorial: http://www.femb.com.mx/people-counter/
 -----------------------------------------------------------------------------
 """
+import thread
 import numpy as np
 import cv2
 import Person
@@ -16,17 +17,38 @@ import datetime
 import smtplib
 from database import *
 from email.mime.text import MIMEText
+ 
+def send_email(direction, save_photo, receivers):
+    # SMTP settings
+    sender = config.GMAIL_USERNAME
+    username = config.GMAIL_USERNAME
+    password = config.GMAIL_PASSWORD
 
-# SMTP settings
-sender = config.GMAIL_USERNAME
-username = config.GMAIL_USERNAME
-password = config.GMAIL_PASSWORD
+    print "Sending email..."
+    # Prepare email's message
+    SUBJECT = "Someone just walked %s!" % direction
+    msg = "Date of the event: %s. " % date.strftime('%d %b %Y %H:%M:%S')
+    if save_photo:
+        msg += "Photo was taken."
+    TO = ','.join(receivers)
+    FROM = sender
+    msg = MIMEText(msg)
+    msg['Subject'] = SUBJECT
+    msg['To'] = TO
+    msg['From'] = FROM
 
-# Login to SMTP server
-server = smtplib.SMTP('smtp.gmail.com:587')
-server.ehlo()
-server.starttls()
-server.login(username, password)
+    # Login to SMTP server
+    server = smtplib.SMTP('smtp.gmail.com:587')
+    server.ehlo()
+    server.starttls()
+    server.login(username, password)
+
+    # Send email to receivers
+    server.sendmail(FROM, receivers, msg.as_string())
+
+    # Close connection with SMTP server
+    server.quit()
+    print "Email was sent"
 
 # Open video file
 cap = cv2.VideoCapture('video.avi')
@@ -156,8 +178,6 @@ while cap.isOpened():
         print "Camera is off"
         # Close db connection
         db.close()
-        # Close connection with SMTP server
-        server.quit()
         break
 
     # Detect contours
@@ -208,22 +228,7 @@ while cap.isOpened():
 
                         # Send email to every who wants notifications
                         if any(receivers):
-                            print "Sending email..."
-                            # Prepare email's message
-                            SUBJECT = "Someone just walked %s!" % person.direction
-                            msg = "Date of the event: %s. " % date.strftime('%d %b %Y %H:%M:%S')
-                            if save_photo:
-                                msg += "Photo was taken."
-                            TO = ','.join(receivers)
-                            FROM = sender
-                            msg = MIMEText(msg)
-                            msg['Subject'] = SUBJECT
-                            msg['To'] = TO
-                            msg['From'] = FROM
-
-                            # Send email to receivers
-                            # server.sendmail(FROM, TO, msg.as_string())
-                            print "Email was sent"
+                            thread.start_new_thread(send_email, (person.direction, save_photo, receivers))
                         else:
                             print "There are no receivers"
 

@@ -5,3 +5,7 @@ video.avi
 *.pyc
 
 .vscode
+
+/configuration_and_examples
+/configuration_and_examples/*
+detect_people_example.py

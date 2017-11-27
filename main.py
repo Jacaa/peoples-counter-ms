@@ -57,71 +57,65 @@ def main():
     # Open video file
     cap = cv2.VideoCapture(0)
 
-    # Camera view is in resolution 360p - 480x360
-    w = 480
-    h = 360
+    # Camera view is in resolution 640x480
+    w = 640
+    h = 480
 
     # Define points coordinates
-    dw = int(w/12) # Width divided by 12
-    _20 = dw/2
-    _40 = dw
-    _80 = 2*dw
-    _120 = 3*dw
-    _160 = 4*dw
-    _200 = 5*dw
-    _240 = 6*dw
-    _280 = 7*dw
-    _320 = 8*dw
-    _360 = 9*dw
-    _400 = 10*dw
-    _440 = 11*dw
-    _460 = int(11.5*dw)
-    _480 = 12*dw
+    dw = int(w/8) # Width divided by 8
+    _80 = dw
+    _160 = 2*dw
+    _240 = 3*dw
+    _320 = 4*dw
+    _400 = 5*dw
+    _480 = 6*dw
+    _560 = 7*dw
+    _640 = 8*dw
 
     # Define lines and texts and their coordinates
     # Line 'left border'
-    pt1 = [_20, 0]
-    pt2 = [_20, _480]
+    pt1 = [_80, 0]
+    pt2 = [_80, _480]
     left_border = np.array([pt1, pt2]).reshape((-1, 1, 2))
 
     # Line 'right border'
-    pt1 = [_460, 0]
-    pt2 = [_460, _480]
+    pt1 = [_560, 0]
+    pt2 = [_560, _480]
     right_border = np.array([pt1, pt2]).reshape((-1, 1, 2))
 
     # Line 'in'
-    pt1 = [_280, 0]
-    pt2 = [_280, _480]
+    pt1 = [_400, 0]
+    pt2 = [_400, _480]
     line_in = np.array([pt1, pt2]).reshape((-1, 1, 2))
 
     # Line 'out'
-    pt1 = [_200, 0]
-    pt2 = [_200, _480]
+    pt1 = [_240, 0]
+    pt2 = [_240, _480]
     line_out = np.array([pt1, pt2]).reshape((-1, 1, 2))
 
     # Arrow 'In'
-    pt1 = [0, _280]
-    pt2 = [_80, _280]
-    pt3 = [_40, _240]
-    pt4 = [_40, _320]
+    pt1 = [0, _320]
+    pt2 = [_160, _320]
+    pt3 = [_80, _240]
+    pt4 = [_80, _400]
     arrow_in1 = np.array([pt1, pt2]).reshape((-1, 1, 2))
     arrow_in2 = np.array([pt2, pt3]).reshape((-1, 1, 2))
     arrow_in3 = np.array([pt2, pt4]).reshape((-1, 1, 2))
 
     # Arrow 'Out'
-    pt1 = [_480, _280]
-    pt2 = [_400, _280]
-    pt3 = [_440, _240]
-    pt4 = [_440, _320]
+    pt1 = [_640, _320]
+    pt2 = [_480, _320]
+    pt3 = [_560, _240]
+    pt4 = [_560, _400]
     arrow_out1 = np.array([pt1, pt2]).reshape((-1, 1, 2))
     arrow_out2 = np.array([pt2, pt3]).reshape((-1, 1, 2))
     arrow_out3 = np.array([pt2, pt4]).reshape((-1, 1, 2))
 
     # Text 'In'
-    textIN = (_320, _320)
+    textIN = (_480, _400)
 
     # Text 'Out'
-    textOUT = (_120, _320)
+    textOUT = (_160, _400)
 
     # Colors:
     red = (0, 0, 255)
@@ -137,15 +131,15 @@ def main():
     kernel_closing = np.ones((11, 11), np.uint8)
 
     # Set minimum area
-    areaMinimum = 7500
+    areaMinimum = 14500
 
     # Variables
     people = []
     person_id = 1
-    line_in_x = _280
-    line_out_x = _200
-    left_border_x = _20
-    right_border_x = _460
+    line_in_x = _400
+    line_out_x = _240
+    left_border_x = 50
+    right_border_x = 610
 
     # Connect to database
     db.connect()

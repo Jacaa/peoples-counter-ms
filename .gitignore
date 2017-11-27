@@ -1,5 +1,7 @@
 # Ignore video file
 video.avi
+video.h264
+video1.h264
 
 # Ignore all .pyc files
 *.pyc

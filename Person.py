@@ -6,6 +6,14 @@ class Person:
         self.y = y
         self.coords_history = []
         self.direction = None
+        self.attemps = 20
+        self.delete = False
+
+    def time_to_delete(self):
+        # Person has 20 frames to cross any line
+        self.attemps -= 1
+        if self.attemps == 0:
+            self.delete = True
 
     def update_coords(self, x, y):
         self.coords_history.append([self.x,self.y])
@@ -21,11 +29,11 @@ class Person:
                 pre_last_coords_x = self.coords_history[-2][0]
                 if last_coords_x > line_in_x and pre_last_coords_x <= line_in_x:
                     self.direction = 'in'
-                    print "Person %s just walked %s" % (self.id, self.direction)
+                    print "Someone just walked %s" % (self.direction)
                     return True
                 elif last_coords_x < line_out_x and pre_last_coords_x >= line_out_x:
                     self.direction = 'out'
-                    print "Person %s just walked %s" % (self.id, self.direction)
+                    print "Someone just walked %s" % (self.direction)
                     return True
             else:
                 return False

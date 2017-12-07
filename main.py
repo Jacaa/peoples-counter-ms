@@ -127,11 +127,11 @@ def main():
     fgbg = cv2.createBackgroundSubtractorMOG2(detectShadows=True)
 
     # Create morphology kernels
-    kernel_opening = np.ones((3, 3), np.uint8)
-    kernel_closing = np.ones((11, 11), np.uint8)
+    kernel_opening = np.ones((7, 7), np.uint8)
+    kernel_closing = np.ones((7, 7), np.uint8)
 
     # Set minimum area
-    areaMinimum = 14500
+    areaMinimum = 10000
 
     # Variables
     people = []
@@ -159,6 +159,14 @@ def main():
 
         # Read a frame
         ret, frame = cap.read()
+
+        # Increase person's time
+        for person in people:
+            person.time_to_delete()
+            if person.delete:
+                index = people.index(person)
+                people.pop(index)
+                del person
 
         # Use subtractor
         fgmask = fgbg.apply(frame)
@@ -233,12 +241,10 @@ def main():
 
                         # If the person goes out of the specified area
                         if person.direction == 'in' and person.x >= right_border_x:
-                            print "Delete person %f" % person.id
                             index = people.index(person)
                             people.pop(index)
                             del person
                         elif person.direction == 'out' and person.x <= left_border_x:
-                            print "Delete person %f" % person.id
                             index = people.index(person)
                             people.pop(index)
                             del person
@@ -246,7 +252,6 @@ def main():
 
                 if new_person:
                     person = Person.Person(person_id, cx, cy)
-                    print 'Created new person, ID: %f' % person.id
                     people.append(person)
                     person_id += 1
 

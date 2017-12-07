@@ -11,3 +11,4 @@ video1.h264
 /configuration_and_examples
 /configuration_and_examples/*
 detect_people_example.py
+main_test.py
